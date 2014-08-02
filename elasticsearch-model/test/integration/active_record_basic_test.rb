@@ -10,6 +10,8 @@ module Elasticsearch
         include Elasticsearch::Model
         include Elasticsearch::Model::Callbacks
 
+        attr_accessor :attr_accessor_attribute
+
         settings index: { number_of_shards: 1, number_of_replicas: 0 } do
           mapping do
             indexes :title,      type: 'string', analyzer: 'snowball'
@@ -171,6 +173,14 @@ module Elasticsearch
 
           response.response.respond_to?(:aggregations)
           assert_equal 2, response.response.aggregations.dates.buckets.first.doc_count
+        end
+
+        should "permit updating attr_accessor attribute from records" do
+          response_records = Article.search('title:test').records
+
+          response_records.first.attr_accessor_attribute = :expected_attr_accessor_attribute_value
+
+          assert_equal :expected_attr_accessor_attribute_value, response_records.first.attr_accessor_attribute
         end
       end
 
